@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elevate</title>
+    <style>
+        /* Base Page Setup */
+        body { 
+            font-family: Arial, sans-serif; 
+            background: #ffffff; 
+            margin: 0; 
+            padding: 0px; 
+            box-sizing: border-box; 
+            color: #ffffff;
+        }
+        
+        .hidden { display: none !important; }
+
+        /* ================= AUTHENTICATION FORM STYLES ================= */
+        .auth-wrapper { display: flex; justify-content: center; align-items: center; min-height: 80vh; color: #333; }
+        .auth-container { background: white; padding: 30px; border-radius: 8px; width: 100%; max-width: 400px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; }
+        .auth-container h2 { color: #2e7d32; margin-top: 0; }
+        .auth-container input { width: 90%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; }
+        .auth-container button { width: 95%; padding: 10px; background: #2e7d32; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
+        .auth-container button:hover { background: #1b5e20; }
+        .toggle-link { color: #2e7d32; cursor: pointer; text-decoration: underline; margin-top: 15px; display: inline-block; }
+
+        /* ================= WIREFRAME DASHBOARD STYLES ================= */
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Top Navigation Bar */
+        .navbar {
+            background-color: #000000;
+            border-radius: 0px;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+        .nav-left { display: flex; align-items: center; gap: 40px; }
+        .logo { font-size: 32px; font-style: italic; font-weight: bold; color: rgb(72, 161, 77); margin: 0; }
+        .nav-links { display: flex; gap: 25px; }
+        .nav-link { color: rgb(72, 161, 77); font-size: 18px; cursor: pointer; text-decoration: none; font-weight: 500; }
+        .nav-link:hover { color: rgb(179, 230, 181); }
+        .nav-right { display: flex; align-items: center; gap: 15px; }
+        .user-name-display { font-size: 22px; color: #a2adb9; font-weight: 500; }
+        
+        /* Interactive Auth Toggle Action Button */
+        .action-btn { background: rgb(72, 161, 77); color: white; border: none; border-radius: 4px; padding: 6px 12px; cursor: pointer; font-size: 14px; }
+        .action-btn:hover { background: rgb(179, 230, 181); }
+
+        /* Three-Column Workspace Content Grid */
+        .workspace {
+            display: grid;
+            grid-template-columns: 1fr 2.5fr 1.5fr; 
+            gap: 20px;
+            min-height: 550px;
+            padding: 0 20px;
+        }
+
+        /* Generic Blueprint Pane Style */
+        .pane {
+            background-color: #e3e8f0;
+            border-radius: 8px;
+            padding: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            font-style: italic;
+            color: #a2adb9;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        /* Inside the Center "Display Trails" Pane */
+        .display-trails-content {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            text-align: left;
+        }
+        .trail-item {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            font-style: normal;
+            font-size: 16px;
+            color: #555;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .guest-notice {
+            background: #fff3e0;
+            color: #ef6c00;
+            padding: 12px;
+            border-radius: 6px;
+            font-style: normal;
+            font-size: 16px;
+            text-align: center;
+            border: 1px solid #ffe0b2;
+        }
+
+        /* Simple Input Form inside the Center section for Adding Hikes */
+        .add-trail-form {
+            background: white;
+            padding: 20px;
+            border-radius: 6px;
+            font-style: normal;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .add-trail-form input, .add-trail-form select {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .add-trail-form button {
+            background: rgb(72, 161, 77);
+            color: rgb(0, 0, 0);
+            border: none;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .add-trail-form button:hover { background: rgb(179, 230, 181); }
+    </style>
+</head>
+<body>
+
+        <div id="header" class="header-container">    
+        <header class="navbar">
+            <div class="nav-left">
+                <h1 class="logo">Elevate</h1>
+                <nav class="nav-links">
+                    <span class="nav-link" id="nav-add-trail">Add Trail</span>
+                    <span class="nav-link" id="nav-view-trails">View Trails</span>
+                </nav>
+            </div>
+            <div class="nav-right">
+                <span class="user-name-display" id="user-display-name"></span>
+                <button id="action-btn" class="action-btn">Log In</button>
+            </div>
+        </header>
+    </div>
+
+    <div id="auth-wrapper" class="auth-wrapper hidden">
+        <div class="auth-container">
+            <h2 id="form-title">Create an Account</h2>
+            <input type="text" id="display-name" placeholder="Full Name" required>
+            <input type="email" id="email" placeholder="Email" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <button id="submit-btn">Sign Up</button>
+            <span class="toggle-link" id="toggle-auth">Already have an account? Log In</span>
+            <br><br>
+            <span class="toggle-link" id="back-to-home" style="color: #666;">← Back to Home</span>
+        </div>
+    </div>
+
+    <div id="dashboard" class="dashboard-container">
+        <main class="workspace">
+    
+            <section class="pane" id="pane-stats" style="flex-direction: column; gap: 15px; font-style: normal; color: #333; justify-content: center; align-items: center;">
+                <div style="font-size: 18px; color: #7d8993; font-weight: bold; margin-bottom: 5px;">Your Stats</div>
+                
+                <div style="text-align: center;">
+                    <div style="font-size: 32px; font-weight: bold; color: rgb(27, 161, 18);" id="stat-distance">0 mi</div>
+                    <div style="font-size: 13px; color: #666;">Total Distance</div>
+                </div>
+                
+                <hr style="width: 60%; border: 0; border-top: 1px solid #ccc; margin: 5px 0;">
+
+                <div style="text-align: center;">
+                    <div style="font-size: 32px; font-weight: bold; color: rgb(27, 161, 18);" id="stat-count">0</div>
+                    <div style="font-size: 13px; color: #666;">Trails Completed</div>
+                </div>
+            </section>
+
+            <section class="pane" id="pane-display">
+                
+                <div id="view-trails-view" class="display-trails-content">
+                    <div style="text-align: center; margin-bottom: 10px;">Wishlist Trails</div>
+                    
+                    <div id="guest-message" class="guest-notice">Login to add trails</div>
+
+                    <div id="protected-trails">
+                        </div>
+                </div>
+
+                <div id="add-trail-view" class="display-trails-content hidden">
+                    <div style="text-align: center; margin-bottom: 10px;">Add New Trail</div>
+                    <form class="add-trail-form" onsubmit="event.preventDefault();">
+                        <input type="text" placeholder="Trail Name" id="trail-name">
+                        <input type="text" placeholder="Location" id="trail-location">
+                        <select id="trail-difficulty">
+                            <option value="easy">Easy</option>
+                            <option value="moderate">Moderate</option>
+                            <option value="hard">Hard</option>
+                        </select>
+                        <input type="text" placeholder="Total Length (e.g. 4.2)" id="trail-length">
+                        <button type="button" id="save-trail-btn">Save to Wishlist</button>
+                    </form>
+                </div>
+
+            </section>
+
+            <section class="pane" id="pane-completed" style="display: flex; flex-direction: column; justify-content: flex-start; gap: 15px; font-style: normal; text-align: left;">
+                <div style="text-align: center; width: 100%; font-size: 20px; color: #7d8993; margin-bottom: 10px;">Completed Trails</div>
+                <div id="completed-trails-list" style="width: 100%;">
+                    </div>
+            </section>
+
+        </main>
+    </div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { 
+        getAuth, 
+        createUserWithEmailAndPassword, 
+        signInWithEmailAndPassword, 
+        signOut, 
+        onAuthStateChanged,
+        updateProfile 
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { 
+        getFirestore, 
+        collection, 
+        addDoc, 
+        onSnapshot, 
+        query, 
+        where,
+        doc,
+        updateDoc,
+        deleteDoc
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyD_4O_We82i8ttBcYj6sP_W8w3p0EbT3XQ",
+        authDomain: "cse310-sprint-4.firebaseapp.com",
+        projectId: "cse310-sprint-4",
+        storageBucket: "cse310-sprint-4.firebasestorage.app",
+        messagingSenderId: "319630198728",
+        appId: "1:319630198728:web:394118a397ec8ed3d6e2fd",
+        measurementId: "G-CWKDSN2NWL"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // DOM Elements - Auth Screen
+    const authWrapper = document.getElementById('auth-wrapper');
+    const nameInput = document.getElementById('display-name'); 
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const submitBtn = document.getElementById('submit-btn');
+    const toggleAuthLink = document.getElementById('toggle-auth');
+    const formTitle = document.getElementById('form-title');
+    const backToHome = document.getElementById('back-to-home');
+
+    // DOM Elements - App Dashboard
+    const header = document.getElementById('header');
+    const dashboard = document.getElementById('dashboard');
+    const userDisplayName = document.getElementById('user-display-name');
+    const actionBtn = document.getElementById('action-btn');
+    const guestMessage = document.getElementById('guest-message');
+    const protectedTrails = document.getElementById('protected-trails');
+    const completedTrailsList = document.getElementById('completed-trails-list');
+    const statDistance = document.getElementById('stat-distance');
+    const statCount = document.getElementById('stat-count');
+
+    // View Switch Navigation Trigger Hooks
+    const navAddTrail = document.getElementById('nav-add-trail');
+    const navViewTrails = document.getElementById('nav-view-trails');
+    const addTrailView = document.getElementById('add-trail-view');
+    const viewTrailsView = document.getElementById('view-trails-view');
+    const saveTrailBtn = document.getElementById('save-trail-btn');
+
+    // DOM Elements for form values
+    const trailNameInput = document.getElementById('trail-name');
+    const trailLocationInput = document.getElementById('trail-location');
+    const trailDifficultySelect = document.getElementById('trail-difficulty');
+    const trailLengthInput = document.getElementById('trail-length');
+
+    let isSignUpMode = true;
+    let isLoggedIn = false; 
+
+    // Show Auth Form Screen View UI
+    function showAuthPage() {
+        dashboard.classList.add('hidden');
+        authWrapper.classList.remove('hidden');
+    }
+
+    // Hide Auth Form Screen View UI
+    function hideAuthPage() {
+        authWrapper.classList.add('hidden');
+        dashboard.classList.remove('hidden');
+    }
+
+    // View Switching Logic
+    if (navAddTrail && navViewTrails) {
+        navAddTrail.addEventListener('click', () => {
+            viewTrailsView.classList.add('hidden');
+            addTrailView.classList.remove('hidden');
+        });
+        
+        navViewTrails.addEventListener('click', () => {
+            addTrailView.classList.add('hidden');
+            viewTrailsView.classList.remove('hidden');
+        });
+    }
+
+    // Action button behavior tweaks based on state
+    actionBtn.addEventListener('click', () => {
+        if (isLoggedIn) {
+            signOut(auth);
+        } else {
+            showAuthPage();
+        }
+    });
+
+    // Save trail routing logic
+    saveTrailBtn.addEventListener('click', async () => {
+        if (!isLoggedIn) {
+            showAuthPage();
+            return;
+        }
+
+        const name = trailNameInput.value.trim();
+        const location = trailLocationInput.value.trim();
+        const difficulty = trailDifficultySelect.value;
+        const length = trailLengthInput.value.trim();
+
+        if (!name || !location) {
+            alert("Please fill out at least the Trail Name and Location!");
+            return;
+        }
+
+        try {
+            await addDoc(collection(db, "trails"), {
+                userId: auth.currentUser.uid,
+                name: name,
+                location: location,
+                difficulty: difficulty,
+                length: length,
+                completed: false, // NEW: Defaults to false when added to the wishlist
+                createdAt: new Date()
+            });
+
+            // Clear fields
+            trailNameInput.value = "";
+            trailLocationInput.value = "";
+            trailLengthInput.value = "";
+            
+            viewTrailsView.classList.remove('hidden');
+            addTrailView.classList.add('hidden');
+
+        } catch (error) {
+            console.error("Error saving trail: ", error);
+            alert("Failed to save trail: " + error.message);
+        }
+    });
+
+    // Function to mark a trail as completed
+window.markAsCompleted = async function(trailId) {
+    try {
+        const trailRef = doc(db, "trails", trailId);
+        await updateDoc(trailRef, { completed: true });
+    } catch (error) {
+        console.error("Error updating trail status: ", error);
+    }
+};
+
+// NEW: Function to permanently delete a trail from Firestore
+window.deleteTrail = async function(trailId) {
+    // Optional: add a quick confirmation prompt so users don't accidentally delete items
+    if (confirm("Are you sure you want to permanently delete this trail from your history?")) {
+        try {
+            const { deleteDoc } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
+            const trailRef = doc(db, "trails", trailId);
+            await deleteDoc(trailRef);
+        } catch (error) {
+            console.error("Error deleting trail: ", error);
+            alert("Failed to delete trail.");
+        }
+    }
+};
+
+    let unsubscribeTrails = null;
+
+    // Monitor Authentication State
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            isLoggedIn = true;
+            userDisplayName.innerText = user.displayName || "User";
+            actionBtn.innerText = "Log Out";
+            
+            guestMessage.classList.add('hidden');
+            protectedTrails.classList.remove('hidden');
+
+            // Monitor ALL user trails in real time
+            const trailsQuery = query(collection(db, "trails"), where("userId", "==", user.uid));
+
+            unsubscribeTrails = onSnapshot(trailsQuery, (snapshot) => {
+                protectedTrails.innerHTML = "";
+                completedTrailsList.innerHTML = "";
+                
+                let totalMiles = 0;
+                let totalWishlistCount = 0;
+                let totalCompletedCount = 0;
+
+                snapshot.forEach((docSnap) => {
+                    const trail = docSnap.data();
+                    const id = docSnap.id;
+                    
+                    let diffColor = "#48a14d"; 
+                    if (trail.difficulty === "moderate") diffColor = "#ef6c00"; 
+                    if (trail.difficulty === "hard") diffColor = "#c62828"; 
+
+                    if (!trail.completed) {
+                        totalWishlistCount++;
+                        // Render into Wishlist Column (Center)
+                        const wishlistHTML = `
+                            <div class="trail-item">
+                                <div>
+                                    <strong>${trail.name}</strong> - ${trail.location} 
+                                    ${trail.length ? `<span style="font-size: 13px; color: #888; margin-left: 5px;">(${trail.length} mi)</span>` : ''}
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 15px;">
+                                    <span style="color: ${diffColor}; text-transform: capitalize; font-weight: bold; font-size: 14px;">
+                                        ${trail.difficulty}
+                                    </span>
+                                    <button onclick="markAsCompleted('${id}')" style="background: rgb(72, 161, 77); border:none; border-radius:4px; padding: 4px 8px; color: white; cursor: pointer; font-size:12px; font-weight:bold;">✓ Hiked</button>
+                                </div>
+                            </div>
+                        `;
+                        protectedTrails.insertAdjacentHTML('beforeend', wishlistHTML);
+                    } else {
+                        totalCompletedCount++;
+                        // Parse mileage dynamically into stats column calculation
+                        if (trail.length) {
+                            const parsedMiles = parseFloat(trail.length);
+                            if (!isNaN(parsedMiles)) {
+                                totalMiles += parsedMiles;
+                            }
+                        }
+
+                        // Render into Completed Column (Right)
+                        const completedHTML = `
+                            <div class="trail-item" style="background: #f1f8e9; border-left: 4px solid #4caf50;">
+                                <div>
+                                    <strong style="color: #2e7d32;">${trail.name}</strong>
+                                    <div style="font-size: 12px; color: #777;">${trail.location} ${trail.length ? `• ${trail.length} mi` : ''}</div>
+                                </div>
+                                <button onclick="deleteTrail('${id}')" style="background: #c62828; border: none; border-radius: 4px; padding: 4px 8px; color: white; cursor: pointer; font-size: 12px; font-weight: bold;">
+                                    ✕ Delete
+                                </button>
+                            </div>
+                        `;
+                        completedTrailsList.insertAdjacentHTML('beforeend', completedHTML);
+                    }
+                });
+
+                // Update stats counter text values dynamically
+                statDistance.innerText = `${totalMiles.toFixed(1)} mi`;
+                statCount.innerText = totalCompletedCount;
+
+                if (totalWishlistCount === 0) {
+                    protectedTrails.innerHTML = `<div class='trail-item' style='justify-content: center; color: #999;'>No trails remaining in your wishlist!</div>`;
+                }
+                if (totalCompletedCount === 0) {
+                    completedTrailsList.innerHTML = `<div class='trail-item' style='justify-content: center; color: #999; background: transparent; box-shadow: none;'>No adventures completed yet.</div>`;
+                }
+            });
+
+            // Reset inputs
+            emailInput.value = "";
+            passwordInput.value = "";
+            nameInput.value = ""; 
+        } else {
+            isLoggedIn = false;
+            userDisplayName.innerText = "";
+            actionBtn.innerText = "Create Account/Log In";
+            
+            guestMessage.classList.remove('hidden');
+            protectedTrails.classList.add('hidden');
+            
+            statDistance.innerText = "0 mi";
+            completedTrailsList.innerHTML = "";
+            statCount.innerText = "0";
+
+            if (unsubscribeTrails) {
+                unsubscribeTrails();
+                unsubscribeTrails = null;
+            }
+            protectedTrails.innerHTML = "";
+        }
+    });
+
+    backToHome.addEventListener('click', hideAuthPage);
+
+    // Toggle UI screens
+    toggleAuthLink.addEventListener('click', () => {
+        isSignUpMode = !isSignUpMode;
+        if (isSignUpMode) {
+            formTitle.innerText = "Create an Account";
+            submitBtn.innerText = "Sign Up";
+            toggleAuthLink.innerText = "Already have an account? Log In";
+            nameInput.classList.remove('hidden'); 
+        } else {
+            formTitle.innerText = "Welcome Back";
+            submitBtn.innerText = "Log In";
+            toggleAuthLink.innerText = "Need an account? Sign Up";
+            nameInput.classList.add('hidden'); 
+        }
+    });
+
+    // Form Actions Submission
+    submitBtn.addEventListener('click', async () => {
+        const email = emailInput.value;
+        const password = passwordInput.value;
+        const displayName = nameInput.value; 
+
+        try {
+            if (isSignUpMode) {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                await updateProfile(userCredential.user, { displayName: displayName });
+                userDisplayName.innerText = displayName;
+                //alert("Account created successfully!");
+            } else {
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                userDisplayName.innerText = userCredential.user.displayName || "User";
+                //alert("Logged in successfully!");
+            }
+            hideAuthPage();
+        } catch (error) {
+            alert(error.message);
+        }
+    });
+</script>
+</body>
+</html>
